@@ -32,17 +32,14 @@
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
-
-<!--
-     I chose to modify my chunking params to reflect the campus corpus small
-     document size, so I chose chunk_size = 350 & chunk_overlap = 50
-     These were initially chosen arbitrarily based on intuition and checking the
-     initial chunking function, but I verified through claude that these work for
-     two reasons:
-     1. since the docs average around 320 chars (longest around 550 chars), this
-     gurantees the majority of corpus docs fit in a single chunk (header + full body, no splitting at all) — only the longest ~1/3 need to split into two. That's good: over-chunking short documents just multiplies near-duplicate embeddings for no retrieval benefit.
+**Chunk size: 350 chars**
+**Overlap: 50 chars**
+I chose to modify my chunking params to reflect the campus corpus small
+document size, so I chose chunk_size = 350 & chunk_overlap = 50
+These were initially chosen arbitrarily based on intuition and checking the
+initial chunking function, but I verified through claude that these work for
+two reasons: 1. since the docs average around 320 chars (longest around 550 chars), this
+gurantees the majority of corpus docs fit in a single chunk (header + full body, no splitting at all) — only the longest ~1/3 need to split into two. That's good: over-chunking short documents just multiplies near-duplicate embeddings for no retrieval benefit.
 
      2. overlap of 50 is 14% of 350 — right in the commonly-cited 10–20% band in the industry.
 
@@ -50,7 +47,7 @@
      splits the documents into lines, then adds sentences at a time until chunk size reached,
      with a guranteed one sentence (even if it goes over). I used claude to help finish the function, and provide much needed utility functions.
 
-     Milestone 3. -->
+<!--Milestone 3. -->
 
 ## Sample Chunks
 
