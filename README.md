@@ -131,7 +131,6 @@ Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.t
 | What do students say about the quality & selection of food at the Kestral Commons during lunch?                                                                       | Yes          | 0.4666        |
 | What do students say about the amount of study time needed outside of class each week for computer science courses?                                                   | Yes          | 0.4036        |
 | What do students say about the overall dining experience at campus, when it comes to dining halls on campus, cost of meal plans, and accessibility of dining dollars? | Yes          | 0.4404        |
-| What do students say about the accessibility of transit on campus?                                                                                                    | No (refused) | 0.6064        |
 | What do students say about the accessibility & operating hours of the transit shuttle on campus?                                                                      | Yes          | 0.3710        |
 | What do students recommend to do to have access to advisers with better tailored guidance for their major?                                                            | No (refused) | 0.7252        |
 | What is the capital of Mongolia?                                                                                                                                      | No (refused) | 0.8246        |
