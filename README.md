@@ -1,6 +1,6 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+<!-- Alex D. Lopez - campus_life -->
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -48,7 +48,7 @@
 
      In terms of the actual strategy, I wanted to use a sentence based chunker, one that first
      splits the documents into lines, then adds sentences at a time until chunk size reached,
-     with a guranteed one sentence (even if it goes over). I used claude to help finish the function, and provide much needed utility functions and imports.
+     with a guranteed one sentence (even if it goes over). I used claude to help finish the function, and provide much needed utility functions.
 
      Milestone 3. -->
 
@@ -88,9 +88,20 @@ Asked about this a lot so writing it down. Moderate; the building is l-shaped an
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question: What do students say about the quality & selection of food at \
+ the Kestral Commons during lunch?**
 
-**Answer:**
+\*\*Answer:
+
+(best distance 0.467, cutoff 0.6)
+
+Based on the documents, students recommend the made-to-order stir-fry station as the thing worth going for, but note that the salad bar wilts after 1:30.
+
+Source: `dining_kestrel_commons.txt`
+
+Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt
+
+1 model calls this session, 692 tokens (639 in, 53 out)\*\*
 
 ```
 
@@ -107,9 +118,28 @@ Asked about this a lot so writing it down. Moderate; the building is l-shaped an
 
      Milestone 4. -->
 
-| Question | In corpus? | Best distance |
-| -------- | ---------- | ------------- |
-|          |            |               |
+     So I decided to keep my relevance cutoff around 0.6 since it seems that
+     it's well within my gap between my questions and the out of scope questions
+     I will note that I did change one of my questions halfway through, but I kept one
+     that is above the relevance cutoff and decided to keep it since it's an example of a
+     question that the corpus could've answered but didn't have enough relevant information
+     to reach that consensus, which I thought was very interesting but ultimately made sense
+     given the context and the fact the docs don't talk much about the advisors.
+
+| Question                                                                                                                                                              | In corpus?   | Best distance |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------------- |
+| What do students say about the quality & selection of food at the Kestral Commons during lunch?                                                                       | Yes          | 0.4666        |
+| What do students say about the amount of study time needed outside of class each week for computer science courses?                                                   | Yes          | 0.4036        |
+| What do students say about the overall dining experience at campus, when it comes to dining halls on campus, cost of meal plans, and accessibility of dining dollars? | Yes          | 0.4404        |
+| What do students say about the accessibility of transit on campus?                                                                                                    | No (refused) | 0.6064        |
+| What do students say about the accessibility & operating hours of the transit shuttle on campus?                                                                      | Yes          | 0.3710        |
+| What do students recommend to do to have access to advisers with better tailored guidance for their major?                                                            | No (refused) | 0.7252        |
+| What is the capital of Mongolia?                                                                                                                                      | No (refused) | 0.8246        |
+| Who won the 1994 World Cup?                                                                                                                                           | No (refused) | 0.8859        |
+| How do I change the oil in a diesel engine?                                                                                                                           | No (refused) | 0.9323        |
+| What is the recommended dosage of ibuprofen for a headache?                                                                                                           | No (refused) | 0.8477        |
+| How do I write a for loop in Rust?                                                                                                                                    | No (refused) | 0.8907        |
+|                                                                                                                                                                       |              |               |
 
 ## How I Used AI
 
@@ -122,9 +152,15 @@ Asked about this a lot so writing it down. Moderate; the building is l-shaped an
 
      Milestone 5. -->
 
-**1.**
+**1. I asked claude to help me make the chunking function based on what I was after:
+Creating a chunking strategy that seperated the docs by lines, then chunked by sentences.
+It gave me that and information regarding how my chunking params that I chose arbitrarily
+based on reading the campus corpus fit to industry standards and practices. Only thing I changed
+were the comments so that they had more brevity and didn't clog space.**
 
-**2.**
+**2. I asked claude to help quickly format my relevance cutoff table so that I could quickly copy
+and paste since I was running low on time & I had already pasted my results from testing
+my questions into a document. It did save me time. I didn't really change anything from the results since I just needed a quick formatting to save time.**
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never

@@ -83,8 +83,6 @@ def fallback_split(
 """
 split_documents — a header-anchored, sentence-aware chunking strategy.
 """
-
-from dataclasses import replace
 import nltk
 
 # nltk's sentence tokenizer needs a one-time data download ("punkt_tab" as of
@@ -129,7 +127,7 @@ def split_documents(
          boundary still appears whole in at least one chunk.
 
     Defaults (350 / 50) are tuned for this corpus: short reviews averaging
-    ~320 chars, longest ~550 chars for default chunkint strat in fallback_split
+    ~320 chars, longest ~550 chars for default chunking strat in fallback_split
     """
     chunk_size = chunk_size or config.CHUNK_SIZE
     overlap = overlap or config.CHUNK_OVERLAP

@@ -65,14 +65,17 @@ or will say that plus some specific info from the documents to at least provide 
 
 ## 4. Chunks reflect the size of corpus docs
 
-Every chunk should be between 250 & 500 chars inclusive, to reflect
-the short form responses of the corpus documents.
+Every chunk should at minimum contain one header and one sentence,
+with a chunk size of ~350 chars
 
 **Why this target:**
 
 <!-- I wanted the chunks to reflect the average char count of the
      campus corpus since it's very short blurbs of info from students, but
      be able to account for questions requiring multiple sources.
+     Using the default chunk function, I know avg doc size is 320 chars, and
+     longest doc is ~550 chars. This make 350 chars ideal to make chunks concise,
+     and make longer docs have more chunks dedicated to denote more info.
 -->
 
 ---
