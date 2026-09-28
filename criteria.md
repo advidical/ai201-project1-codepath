@@ -4,13 +4,13 @@ Five criteria that say what "working" means for this system, written in unit 1
 **before** any results existed.
 
 An acceptance criterion names a target: a number, a count, a rate, or something
-a person could plainly observe. *"Retrieval works"* is an opinion. *"For at
+a person could plainly observe. _"Retrieval works"_ is an opinion. _"For at
 least 4 of my 5 test questions, the top results include a chunk containing the
-answer"* is a criterion.
+answer"_ is a criterion.
 
 Under each one, write a sentence or two on **why that target** and not a
 stricter or looser one. A reason that says something about your corpus or your
-pipeline earns credit; *"80% seemed reasonable"* does not.
+pipeline earns credit; _"80% seemed reasonable"_ does not.
 
 > Missing your own targets next unit costs you nothing. Setting a target so
 > easy you can't miss it does.
@@ -23,8 +23,12 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+
+<!-- I picked 4 of 5 because one of my questions is about a
+     topic that includes two different prefix documents, admin & dining.
+     I want to see if the model can understand the relationship between
+     dining prefix documents and admin_dining documents and provide at least
+     specific points of the campus dining experience. -->
 
 ---
 
@@ -33,8 +37,9 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+
+<!-- I want to understand the model and what it gets right and wrong,
+     as in understanding how it adapts to scope. -->
 
 ---
 
@@ -50,49 +55,36 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+
+<!-- My question regarding dining experience at campus is very general and does ask
+for an overall view, so I want to see if it will simply say it cannot make that assessment,
+or will say that plus some specific info from the documents to at least provide relevant info
+-->
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks reflect the size of corpus docs
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+Every chunk should be between 250 & 800 chars inclusive, to reflect
+the short form responses of the corpus documents.
 
 **Why this target:**
 
-
+<!-- I wanted the chunks to reflect the average char count of the
+     campus corpus since it's very short blurbs of info from students, but
+     be able to account for questions requiring multiple sources.
+-->
 
 ---
 
-## 5. Your choice
+## 5. Understand topic relevance question fits under
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For at least 4 of 5 test questions, all 3 top-ranked retrieved documents have the same predefined topic prefix as the test question (e.g., an admin question retrieves only admin documents).
 
 **Why this target:**
 
-
-
+<!--I want my questions to pull the right topic(s) relevant to the question, and see
+    how well or badly it does doing so. ->
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────
