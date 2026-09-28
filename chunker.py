@@ -80,24 +80,140 @@ def fallback_split(
     return chunks
 
 
-def split_documents(documents: list[Document]) -> list[Chunk]:
+"""
+split_documents — a header-anchored, sentence-aware chunking strategy.
+"""
+
+from dataclasses import replace
+import nltk
+
+# nltk's sentence tokenizer needs a one-time data download ("punkt_tab" as of
+# nltk >= 3.9; older nltk versions use "punkt"). This check-then-download
+# pattern means the download only happens once per machine, not once per call.
+try:
+    nltk.data.find("tokenizers/punkt_tab")
+except LookupError:
+    nltk.download("punkt_tab", quiet=True)
+
+
+def _split_into_sentences(line: str) -> list[str]:
+    """Split a single line into sentence-sized pieces, dropping empties."""
+    pieces = nltk.sent_tokenize(line.strip())
+    return [p.strip() for p in pieces if p.strip()]
+
+
+def split_documents(
+    documents: list[Document],
+    chunk_size: int | None = None,
+    overlap: int | None = None,
+) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Header-anchored, sentence-aware chunker for short, line-delimited docs
+    (e.g. one student review per file, first line = header).
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    Strategy:
+      1. Treat each file's first non-empty line as its header. Every chunk
+         emitted for this doc gets that header prepended, so a chunk can
+         always be traced back to its source topic even out of context.
+      2. Treat the remaining lines as the "pre-chunked" units the corpus is
+         already naturally divided into. (assumes newline delimited corpus)
+      3. Within those lines, split down to sentences — the smallest unit we
+         are willing to hand back to the retriever — and greedily pack
+         sentences into a chunk until adding one more would blow the
+         chunk_size budget (header included in that budget).
+      4. Every chunk is guaranteed at least one full sentence, even if that
+         single sentence alone (plus header) exceeds chunk_size — we never
+         cut a sentence in half.
+      5. Consecutive chunks share a sentence-aligned overlap of up to
+         `overlap` characters, so an idea that lands right at a chunk
+         boundary still appears whole in at least one chunk.
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    Defaults (350 / 50) are tuned for this corpus: short reviews averaging
+    ~320 chars, longest ~550 chars for default chunkint strat in fallback_split
     """
-    return fallback_split(documents)
+    chunk_size = chunk_size or config.CHUNK_SIZE
+    overlap = overlap or config.CHUNK_OVERLAP
+
+    if overlap >= chunk_size:
+        raise ValueError("overlap has to be smaller than chunk_size")
+
+    chunks: list[Chunk] = []
+
+    for doc in documents:
+        # --- Step 1: pull out header vs. body ---
+        lines = [ln.strip() for ln in doc.text.split("\n") if ln.strip()]
+        if not lines:
+            continue  # empty doc, nothing to chunk
+
+        header = lines[0]
+        body_lines = lines[1:] if len(lines) > 1 else []
+
+        # --- Step 2: flatten body lines into a flat list of sentences ---
+        sentences: list[str] = []
+        for line in body_lines:
+            sentences.extend(_split_into_sentences(line))
+
+        if not sentences:
+            # Doc was just a header with no body content
+            sentences = [header]
+
+        # --- Steps 3/4: greedily pack sentences into size-bounded chunks ---
+        index = 0
+        i = 0
+        n = len(sentences)
+
+        while i < n:
+            current: list[str] = []
+            body_len = 0
+            j = i
+
+            while j < n:
+                candidate = sentences[j]
+                sep_len = 1 if current else 0  # space joining sentences
+                new_body_len = body_len + sep_len + len(candidate)
+                # header + "\n" + body, measured against chunk_size
+                prospective_total = len(header) + 1 + new_body_len
+
+                if current and prospective_total > chunk_size:
+                    # Adding this sentence would overflow the budget, and we
+                    # already have >=1 sentence in this chunk — stop here.
+                    break
+
+                # Either we're under budget, or this is the first sentence
+                # in the chunk ("min one sentence" guarantee, regardless of overflow)
+                current.append(candidate)
+                body_len = new_body_len
+                j += 1
+
+            body_text = " ".join(current)
+            chunks.append(
+                Chunk(
+                    text=f"{header}\n{body_text}",
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+            index += 1
+
+            if j >= n:
+                break  # consumed the whole doc
+
+            # --- Step 5: compute sentence-aligned overlap for next window ---
+            # Create sliding window going from (j-1) towards start(i)
+            # Creating windows of overlap chars, adding 1 sentence at a time
+            overlap_chars = 0
+            k = j - 1
+            while k > i and overlap_chars < overlap:
+                overlap_chars += len(sentences[k]) + 1
+                k -= 1
+
+            # Next window starts at k+1 (the first sentence to re-include), 
+            # but must move forward by at least one sentence, or
+            # risk infinite loop on one over-sized sentence
+            i = max(k + 1, i + 1)
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:

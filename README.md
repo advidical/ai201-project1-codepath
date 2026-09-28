@@ -25,6 +25,9 @@
      questions your system answers. Write it for someone who has never seen
      this repo.
 
+     I chose the campus corpus for the relatively small chunking size I could use
+     to curate my chunks.
+
      Milestone 5. -->
 
 ## Chunking Strategy
@@ -32,13 +35,20 @@
 **Chunk size:**
 **Overlap:**
 
-<!-- What about YOUR documents made you pick these numbers? Short posts and
-     long sectioned guides don't want the same chunking, and "800 seemed
-     reasonable" earns nothing. Point at something you noticed when you read
-     the documents in Milestone 1.
+<!--
+     I chose to modify my chunking params to reflect the campus corpus small
+     document size, so I chose chunk_size = 350 & chunk_overlap = 50
+     These were initially chosen arbitrarily based on intuition and checking the
+     initial chunking function, but I verified through claude that these work for
+     two reasons:
+     1. since the docs average around 320 chars (longest around 550 chars), this
+     gurantees the majority of corpus docs fit in a single chunk (header + full body, no splitting at all) — only the longest ~1/3 need to split into two. That's good: over-chunking short documents just multiplies near-duplicate embeddings for no retrieval benefit.
 
-     If you changed your mind partway through, say so and say why. That's worth
-     more than pretending you got it right first time.
+     2. overlap of 50 is 14% of 350 — right in the commonly-cited 10–20% band in the industry.
+
+     In terms of the actual strategy, I wanted to use a sentence based chunker, one that first
+     splits the documents into lines, then adds sentences at a time until chunk size reached,
+     with a guranteed one sentence (even if it goes over). I used claude to help finish the function, and provide much needed utility functions and imports.
 
      Milestone 3. -->
 
@@ -53,30 +63,25 @@
 
      Milestone 3. -->
 
-**Chunk 1** — source: `` — produced by: ``
+**Chunk 1** — source: admin_add_drop_deadline.txt#0 ` — produced by: chunker.py::split_documents`
+On the add/drop deadline
+You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
 
-```
-```
+**Chunk 2** - source: course_cs_210.txt#1 ` — produced by: chunker.py::split_documents`
+CS 210 Data Structures
+Midterms are curved, the final is not. Expect 8 to 10 hours a week outside class. The one piece of advice: do the labs even though they're only 10% — the exams reuse the lab problems.
 
-**Chunk 2** — source: `` — produced by: ``
+**Chunk 3** - source: course_phys_130.txt#0 ` — produced by: chunker.py::split_documents`
+PHYS 130 Mechanics
+Just finished a year in this building. Format is lecture with a compulsory lab that meets fortnightly. Assessment: three midterms, no final, plus a lab practical. Not curved, but the lowest midterm is dropped. Expect 7 hours a week, plus 3 on lab weeks.
 
-```
-```
+**Chunk 4** - source: dining_the_ridgeway_cafe_followup.txt#0 ` — produced by: chunker.py::split_documents`
+Re: The Ridgeway Café
+Adding to what people have said about The Ridgeway Café. The wait figure of 10 to 15 minutes at 12:30 matches what I've seen. If you're trying to eat between classes, go before 11:45 and it's a different building entirely. Also worth saying: seating is tight; about 40 seats for a building of 900.
 
-**Chunk 3** — source: `` — produced by: ``
-
-```
-```
-
-**Chunk 4** — source: `` — produced by: ``
-
-```
-```
-
-**Chunk 5** — source: `` — produced by: ``
-
-```
-```
+**Chunk 5** - source: housing_innisfree_hall_noise.txt#0 ` — produced by: chunker.py::split_documents`
+Noise levels in Innisfree Hall
+Asked about this a lot so writing it down. Moderate; the building is l-shaped and the short wing is much quieter. If you're someone who needs quiet to work, the library is open until 2am during term and that's what most people in this building end up doing.
 
 ## Sample Answer
 
@@ -88,6 +93,7 @@
 **Answer:**
 
 ```
+
 ```
 
 **My relevance cutoff:**
@@ -102,8 +108,8 @@
      Milestone 4. -->
 
 | Question | In corpus? | Best distance |
-|---|---|---|
-|  |  |  |
+| -------- | ---------- | ------------- |
+|          |            |               |
 
 ## How I Used AI
 
@@ -145,13 +151,13 @@
 
      Milestone 1. -->
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| Criterion                              | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| -------------------------------------- | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer | 4 of 5 |       |       |       |         |
+| 2. Every answer names a source         | 5 of 5 |       |       |       |         |
+| 3. Gate stops out-of-corpus questions  | 4 of 5 |       |       |       |         |
+| 4.                                     |        |       |       |       |         |
+| 5.                                     |        |       |       |       |         |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -168,13 +174,13 @@
 
      Milestone 2. -->
 
-| # | Criterion | Verdict | How I decided |
-|---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| #   | Criterion | Verdict | How I decided |
+| --- | --------- | ------- | ------------- |
+| 1   |           |         |               |
+| 2   |           |         |               |
+| 3   |           |         |               |
+| 4   |           |         |               |
+| 5   |           |         |               |
 
 ## Diagnoses
 
@@ -210,13 +216,13 @@
 <!-- Same format, same five criteria, three runs each.
      `python run_eval.py --label after` -->
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| Criterion                              | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| -------------------------------------- | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer | 4 of 5 |       |       |       |         |
+| 2. Every answer names a source         | 5 of 5 |       |       |       |         |
+| 3. Gate stops out-of-corpus questions  | 4 of 5 |       |       |       |         |
+| 4.                                     |        |       |       |       |         |
+| 5.                                     |        |       |       |       |         |
 
 **Did it help?**
 

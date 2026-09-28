@@ -65,7 +65,7 @@ or will say that plus some specific info from the documents to at least provide 
 
 ## 4. Chunks reflect the size of corpus docs
 
-Every chunk should be between 250 & 800 chars inclusive, to reflect
+Every chunk should be between 250 & 500 chars inclusive, to reflect
 the short form responses of the corpus documents.
 
 **Why this target:**
