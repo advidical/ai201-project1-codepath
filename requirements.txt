@@ -51,4 +51,4 @@ flask>=3.0,<3.2
 gunicorn>=23.0,<24.0
 
 # Added nltk tokenizer for this project 
-nltk>=3.9
+nltk>=3.9, <3.11

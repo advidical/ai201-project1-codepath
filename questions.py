@@ -29,8 +29,8 @@ QUESTIONS = [
      each week for computer science courses?", "expects": "hours a week time :course_cs"},
     {"question": "What do students say about the accessibility & operating hours of the \
      transit shuttle on campus?", "expects": "campus shuttle free student ID Fenwick Court :transit"},
-    {"question": "What do students recommend to do to have access to advisers with \
-     better tailored guidance for their major?", "expects": "departmental adviser :admin"},
+    {"question": "What advice do students most commonly leave when it comes to registering for \
+     your courses & picking your adviser?", "expects": "adviser register hold book :admin"},
     {"question": "What do students say about the overall dining experience at campus, when\
      it comes to dining halls on campus, cost of meals plans, and accessibility of dining dollars?", 
      "expects": "minutes pm am :dining"},

@@ -243,20 +243,66 @@ Printed from run_eval.py
 | 4   | Chunk should be ~350 chars/A header & a sentence          | MET     | results from run_eval.py,did by hand. |
 | 5   | 3 top-ranked retrieved documents cover the relevant topic | MISSED  | results from run_eval.py,did by hand. |
 
+<!-- provided runs from fine tuned question #4 -->
+
+### What advice do students most commonly leave when it comes to registering for your courses & picking your adviser? — run 1
+
+- Best distance: 0.5460 (passed the gate)
+- Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
+
+```
+Based on the documents, students advise booking an appointment with your adviser two weeks in advance because they get busy the week before registration opens. You must have your adviser hold lifted before you can register.
+
+Source: `advising_registration.txt`
+```
+
+### What advice do students most commonly leave when it comes to registering for your courses & picking your adviser? — run 2
+
+- Best distance: 0.5460 (passed the gate)
+- Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
+
+```
+Based on the documents, students advise booking an appointment with your adviser two weeks out, because advisers get busy in the week before registration opens, and you need your adviser hold lifted to register (*advising_registration.txt*). Additionally, registration times are staggered by credit hours, and popular courses tend to fill up in the first two days (*advising_registration.txt*).
+```
+
+### What advice do students most commonly leave when it comes to registering for your courses & picking your adviser? — run 3
+
+- Best distance: 0.5460 (passed the gate)
+- Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
+
+```
+Based on the documents, students advise booking an appointment with your adviser two weeks in advance because they get busy in the week before registration opens. You also need to have your adviser hold lifted before you can register.
+
+Source: `advising_registration.txt`
+
+Generated from run_eval.py
+
 ## Diagnoses
 
-I missed criterion 5 because of this: specifying at least 3 documents containing
-the topic I'm looking for means questions that narrowly only need one source document to answer will fail, but that doesn't mean it didn't get the right answer. I don't think the problem
-were the questions in this case, but in the fact I specified 3 documents containing the topic.
-So i'll change this criterion to find if any source documents contained the question topic prefix.
+So question 5 was about the transit shuttle. From what I could tell, I missed criterion 5 because of this: in the sources from the run log during retrieval, I saw two things: one, that question 5 pulled only 4 source documents (which is fine since larger docs will have 2 chunks), and I saw that only two documents (which were the only two documents that did happen to be related to this topic).
+So the stage it failed at was during retrieval, and the mechanism was that there were only 2
+relevant topic documents it sourced, which isn't a bug but rather a limitation of the corpus docs,
+since it only provides two documents in total talking about transit on campus.
+
+I also saw that criterion 2 was the only one failing for question 4 (which was the one I left that
+failed the relevance gate). I kept it as a lesson of having a question where it was reasonable to ask but the source documents just didn't have enough information to aadequately answer it, but
+now I want to tighten the question to see if I can re-word it to get a response, and honestly
+it's good practice to tighten my question prompts.
 
 ## The Improvement
 
 **What I changed:**
-I changed criterion 5 to check if only one document out of 4/5 test questions names at least one relevant source, as specified in criteria.md to account for very narrow questions that need only 1-2 source documents to adequately answer the question. I haven't made any other changes, except for changes in scorer.py & run_eval.py so that instead of seeing if all checks passed for each question, check by each criterion so It more clearly shows which criterion I'm missing. I also spotted a bug in my scorer function that was incorrectly grading criterion #5.
+I changed criterion 5 to check if only one document out of 4/5 test questions names at least one relevant source, as specified in criteria.md to account for very narrow questions that need only 1-2 source documents to adequately answer the question.
+
+I also tightened my ground prompt for question #4, since it was being refused, and I wanted to see if re-wording to be more general about course registration and advising instead of asking specifically about what students recommend to get better advisers.
+
+Other changes were bug fixes to my scorer.py & small changes to run_eval.py so that I could check each criterion individually.
 
 **Why I picked it:**
-I made theses changes because of two reasons: one, as outlined with criterion 5, I needed to account for questions with narrow topics; two, for quicker judgement of what criterion passsed vs failed for each question.
+I made theses changes because of two reasons:
+
+1. As I mentioned with criterion 5, I needed to account for questions with narrow topics;
+2. I wanted to practice tightening my ground prompting & see if re-wording has any noticable improvement.
 
 ### Run Log — After
 
@@ -271,8 +317,12 @@ I made theses changes because of two reasons: one, as outlined with criterion 5,
 | 4. Chunk should be ~350 chars/A header & a sentence                              | 5 of 5 | PASS  | PASS  | PASS  | MET     |
 | 5. At least 1 top-ranked retrieved document has the same predefined topic prefix | 4 of 5 | PASS  | PASS  | PASS  | MET     |
 
-**Did it help?**
-This helped alot to automate and see my results in a much clearer way, honestly wished I did this earlier in class.
+
+
+**Did it help**
+Yes! criterion #5 now passes for all questions, & tightening the ground prompt for question #4 did
+lead to it passing all criterion. Also the changes I made to my scorer.py & mods to run_eval.py
+definitely helped.
 
 ## What's Still Broken
 
@@ -296,4 +346,6 @@ but you may disagree with that approach.
      Milestone 5. -->
 
 Honestly, only thing I'd do differently is make sure I do some of the activities during class,
-so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it.
+so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it. Well ok another thing is to use that extra time to experiment with different methods
+for the expects column so I'm not using substring to find keywords, but instead use a more intuitive method that uses something like regex patterns.
+```

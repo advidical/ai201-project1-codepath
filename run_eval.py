@@ -208,7 +208,6 @@ def write_report(rows, transcript, gate_rows, args, corpus, top_k, threshold, sc
     for row in rows:
         cells = []
         for passed in row["runs"]:
-
             cells.append({True: "pass", False: "fail", None: " "}[passed])
         question = row["question"].replace("|", "\\|")
         lines.append(f"| {question} | {' | '.join(cells)} |")
