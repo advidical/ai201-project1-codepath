@@ -344,6 +344,101 @@ but you may disagree with that approach.
 
      Milestone 5. -->
 
-Honestly, only thing I'd do differently is make sure I do some of the activities during class,
-so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it. Well ok another thing is to use that extra time to experiment with different methods
+For the criteria, I will be more conscience of writing any criteria that is dependent on the topics my chunks pulls from, as I should've been more aware that ranking by top 3 documents in a chunking strategy that only pulls 5 chunks means that at most I would pull 5 source documents. I would also
+consider experimenting with pulling more chunks to see how that affects the end product, as I did notice during one of my test runs that my model referenced a document that was cut off by the relevance gate, but produced it because the closest distance source document was below the relevance threshold. Another thing is to use extra time to experiment with different methods
 for the expects column so I'm not using substring to find keywords, but instead use a more intuitive method that uses something like regex patterns.
+
+# Stretch Feature
+
+Alright bonus round! Let's see if I can get away with this :-)
+
+## Implementing Hybrid Search
+
+Alright so I implemented hybrid search via creating a bm25.py file doing the bm25 data,
+& I made changes to app.py, store.py, & run_eval.py to add a --search flag so that I can specify
+running hybrid_search while keeping search as the default option.
+
+## What had to be fixed
+
+A bug that I did find in the initial implementation was that because bm25 has trouble
+dealing with generic vocabulary every type of review shares (ie dining shares words like 'food',
+'quality', 'selection', 'lunch', etc.). This is a structural limitation of BM25 (it sums word-match
+evidence with no idea which words identify this entity versus which are just genre vocabulary).
+This stems from the tokenizer used via regex : re.compile(r"[a-z0-9]+"). In layman's terms,
+it doesn't have a concept of compound words like "stir-fry" or "high school" or 'firefighter',
+instead it splits them into their components and treat each one as separate tokesn. This
+became a problem because it led to criterion #1 failing for one of my questions.
+
+## From my log before fix:
+
+### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 1
+
+- Best distance: 0.4519 (passed the gate)
+- Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
+
+```
+Based on the provided documents, students note that the salad bar at Kestrel Commons wilts after 1:30 (dining_kestrel_commons_followup.txt).
+```
+
+### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 2
+
+- Best distance: 0.4519 (passed the gate)
+- Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
+
+```
+Students say that the salad bar at Kestrel Commons wilts after 1:30.
+
+Source: dining_kestrel_commons_followup.txt
+```
+
+### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 3
+
+- Best distance: 0.4519 (passed the gate)
+- Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
+
+```
+Based on the documents, students note that the salad bar at Kestrel Commons wilts after 1:30.
+
+Source: dining_kestrel_commons_followup.txt
+```
+
+## The bug fix
+
+After consulting with claude, the simplest solution was to weigh down the keyword search so that
+it has half as much impact as semantic search. I also got key stopwords for the tokenizer to watch
+out for common stop words & contractions.
+
+## Run after fix
+
+### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 1
+
+- Best distance: 0.4348 (passed the gate)
+- Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
+
+```
+Students mention that the stir-fry station (which is made to order) is worth going for, while the salad bar tends to wilt after 1:30.
+
+Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+```
+
+### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 2
+
+- Best distance: 0.4348 (passed the gate)
+- Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
+
+```
+Students say that the salad bar at Kestrel Commons wilts after 1:30, and they recommend the made-to-order stir-fry station as the thing worth going for.
+
+Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+```
+
+### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 3
+
+- Best distance: 0.4348 (passed the gate)
+- Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
+
+```
+Students mention that the stir-fry station (which is made to order) is worth going for, while the salad bar tends to wilt after 1:30.
+
+Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+```

@@ -24,7 +24,7 @@ names a target of "4 of 5", and four of three is not a thing.
 QUESTIONS = [
     # {"question": "...", "expects": "..."},
     {"question": "What do students say about the quality & selection of food at \
-     the Kestral Commons during lunch?", "expects": "stir-fry station salad bar wilt :dining_kestrel_commons"},
+     the Kestrel Commons during lunch?", "expects": "stir-fry station salad bar wilt :dining_kestrel_commons"},
     {"question": "What do students say about the amount of study time needed outside of class\
      each week for computer science courses?", "expects": "hours a week time :course_cs"},
     {"question": "What do students say about the accessibility & operating hours of the \

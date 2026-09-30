@@ -30,9 +30,7 @@ def judge(question: str,expects: str, answer: str, results: list[Result], gate_r
  
     def _share_topic_prefix(expects_topic: str, results: list[Result]):
         # "Same topic" == expects_topic shows up as a substring of the
-        # source filename (case-sensitive, matching your corpus's casing),
-        # e.g. expects_topic="dining" matches both
-        # "admin_dining_dollars.txt" and "dining_kestrel_commons.txt".
+        # source filename (case-sensitive, matching your corpus's casing)
         my_topics = [r.source for r in results]
         return any(expects_topic in topics for topics in my_topics)
 

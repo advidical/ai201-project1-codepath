@@ -51,13 +51,17 @@ def load_scorer():
     return judge if callable(judge) else None
 
 
-def run_once(question: str, top_k, threshold, corpus, variant):
+def run_once(question: str, top_k, threshold, corpus, variant, search_alg: str):
     """One question, one run. Returns the answer and what retrieval gave us."""
-    from store import search
+    from store import search, hybrid_search
     import gate
     from generate import answer_from_chunks
 
-    results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+    if "hybrid" in search_alg:
+        results = hybrid_search(question, top_k=top_k, corpus=corpus, variant=variant)
+    else:
+        results = search(question, top_k=top_k, corpus=corpus, variant=variant)
+
     decision = gate.check(results, threshold=threshold)
 
     if not decision.passed:
@@ -76,6 +80,8 @@ def main():
     parser.add_argument("--variant", default="default")
     parser.add_argument("--top-k", type=int, default=None)
     parser.add_argument("--threshold", type=float, default=None)
+    parser.add_argument("--search", default='search', help="pick between search(semantic meaning only) or hybrid (" \
+    "combines semantic & keyword (bm25) search)")
     args = parser.parse_args()
 
     corpus = args.corpus or config.CORPUS
@@ -112,7 +118,7 @@ def main():
         run_results = []
         for run in range(1, args.runs + 1):
             answer, results, decision = run_once(
-                question, top_k, threshold, corpus, args.variant
+                question, top_k, threshold, corpus, args.variant, args.search
             )
             passed = judge(question, expects, answer, results, gate_rows) if judge else None
             run_results.append(all(passed))

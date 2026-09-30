@@ -146,15 +146,23 @@ def cmd_chunks(args):
 
 def cmd_retrieve(args):
     """Milestone 4. Retrieval only, with distances, and no model call."""
-    from store import search
+    from store import search, hybrid_search
     import gate
 
-    results = search(
-        args.question,
-        top_k=args.top_k or config.TOP_K,
-        corpus=args.corpus or config.CORPUS,
-        variant=args.variant,
-    )
+    if "hybrid" in args.search:
+        results = hybrid_search(
+            args.question,
+            top_k=args.top_k or config.TOP_K,
+            corpus=args.corpus or config.CORPUS,
+            variant=args.variant,
+        )
+    else:
+        results = search(
+            args.question,
+            top_k=args.top_k or config.TOP_K,
+            corpus=args.corpus or config.CORPUS,
+            variant=args.variant,
+        )
 
     if not results:
         print("Nothing came back. Have you run `python app.py index`?")
@@ -181,6 +189,7 @@ def ask_pipeline(
     variant="default",
     top_k=None,
     threshold=None,
+    search_alg="search",
     on_gate=None,
     on_prompt=None,
 ):
@@ -193,22 +202,36 @@ def ask_pipeline(
     when to refuse would be a second cutoff you'd have to keep in step with
     this one, and it would drift.
 
+    `search_alg` picks the retrieval method: "search" (semantic only, the
+    default) or anything containing "hybrid" to use store.hybrid_search
+    instead (semantic + BM25 keyword, fused with reciprocal rank fusion).
+    Same substring check as run_eval.py's --search flag, kept consistent so
+    both entry points behave identically for the same value.
+
     The two optional callbacks let the command line print as it goes without
     this function knowing anything about printing: `on_gate` is handed the gate
     decision as soon as it's made, and `on_prompt` is handed the assembled
     prompt just before it goes out — that's how `--show-prompt` shows you the
     prompt while the model is still thinking rather than after.
     """
-    from store import search
+    from store import search, hybrid_search
     import gate
     from generate import answer_from_chunks, build_prompt
 
-    results = search(
-        question,
-        top_k=top_k or config.TOP_K,
-        corpus=corpus or config.CORPUS,
-        variant=variant,
-    )
+    if "hybrid" in search_alg:
+        results = hybrid_search(
+            question,
+            top_k=top_k or config.TOP_K,
+            corpus=corpus or config.CORPUS,
+            variant=variant,
+        )
+    else:
+        results = search(
+            question,
+            top_k=top_k or config.TOP_K,
+            corpus=corpus or config.CORPUS,
+            variant=variant,
+        )
     decision = gate.check(results, threshold=threshold)
     if on_gate is not None:
         on_gate(decision)
@@ -242,6 +265,7 @@ def _ask_one(
     variant,
     top_k,
     threshold,
+    search_alg="search",
     show_distances=True,
     show_prompt=False,
 ):
@@ -269,6 +293,7 @@ def _ask_one(
         variant=variant,
         top_k=top_k,
         threshold=threshold,
+        search_alg=search_alg,
         on_gate=print_distances if show_distances else None,
         on_prompt=print_prompt if show_prompt else None,
     )
@@ -294,6 +319,7 @@ def cmd_ask(args):
                 args.variant,
                 args.top_k,
                 args.threshold,
+                search_alg=args.search,
                 show_prompt=args.show_prompt,
             )
         else:
@@ -312,6 +338,7 @@ def cmd_ask(args):
                     args.variant,
                     args.top_k,
                     args.threshold,
+                    search_alg=args.search,
                     show_prompt=args.show_prompt,
                 )
     finally:
@@ -360,12 +387,22 @@ def build_parser():
     p_ret = sub.add_parser("retrieve", help="show distances only (Milestone 4)")
     p_ret.add_argument("question")
     p_ret.add_argument("--top-k", type=int)
+    p_ret.add_argument(
+        "--search",
+        default="search",
+        help="'search' (semantic only, default) or 'hybrid' (semantic + BM25 keyword)",
+    )
     p_ret.set_defaults(func=cmd_retrieve)
 
     p_ask = sub.add_parser("ask", help="ask a question")
     p_ask.add_argument("question", nargs="?")
     p_ask.add_argument("--top-k", type=int)
     p_ask.add_argument("--threshold", type=float, help="override the gate cutoff")
+    p_ask.add_argument(
+        "--search",
+        default="search",
+        help="'search' (semantic only, default) or 'hybrid' (semantic + BM25 keyword)",
+    )
     p_ask.add_argument(
         "--show-prompt",
         action="store_true",

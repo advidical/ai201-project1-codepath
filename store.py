@@ -220,6 +220,93 @@ def search(
     return results
 
 
+def hybrid_search(
+    question: str,
+    top_k: int | None = None,
+    corpus: str | None = None,
+    variant: str = "default",
+    bm25_weight: float = 0.5,
+) -> list[Result]:
+    """
+    Like `search`, but combines semantic distance with BM25 keyword scoring
+    via Reciprocal Rank Fusion (see bm25.py) before returning the top_k.
+
+    Unlike `search`, this ranks the FULL corpus both ways (semantic + BM25)
+    rather than only chroma's shortlist, so a chunk that's a strong keyword
+    match but a weak semantic match still gets a fair shot at being fused in.
+    That's affordable here because this course's corpora are small; at real
+    scale you'd cap each ranking to its own top-N candidates before fusing.
+
+    `bm25_weight` (default 0.5) trusts BM25 at custom weight of semantic
+    ranking in the fusion. Default is set to .5 (half the weight of semantic meaning)
+    as testing against one of the corpuses showed BM25 weighted equally (1.0) can be fooled 
+    by generic vocabulary shared across many documents of the same kind
+    (e.g. every dining-hall review using words ike "food", "quality", "selection") 
+    and rank a semantically-wrong document chunk above the right one(s), 
+    even though the semantic ranking already had it right. Weighting BM25 down 
+    lets it still surface genuine exact-term matches (names, numbers) without
+    letting generic-vocabulary noise override a correct semantic ranking.
+
+    `Result.distance` still holds the true cosine distance for that chunk
+    (not a fused score) — so anything reading distance for the relevance
+    gate (e.g. `min(r.distance for r in results)`) keeps working unchanged.
+    The ORDER of the returned list reflects the fused rank, not pure
+    distance order.
+    """
+    from bm25 import BM25Index, reciprocal_rank_fusion
+
+    top_k = top_k or config.TOP_K
+    name = config.collection_name(corpus, variant)
+
+    try:
+        collection = _client().get_collection(name)
+    except Exception as exc:
+        raise RuntimeError(
+            f"No index called '{name}'. Run `python app.py index` first."
+        ) from exc
+
+    # Full corpus, no embedding required for .get().
+    everything = collection.get(include=["documents", "metadatas"])
+    all_ids = everything["ids"]
+    all_docs = everything["documents"]
+    all_metas = everything["metadatas"]
+    id_to_pos = {doc_id: pos for pos, doc_id in enumerate(all_ids)}
+
+    # --- semantic ranking over the whole corpus ---
+    raw = collection.query(
+        query_embeddings=embed([question]),
+        n_results=len(all_ids),
+    )
+    semantic_ids_ranked = raw["ids"][0]
+    distance_by_id = dict(zip(raw["ids"][0], raw["distances"][0]))
+    semantic_rank_positions = [id_to_pos[doc_id] for doc_id in semantic_ids_ranked]
+
+    # --- BM25 ranking over the whole corpus, same index positions ---
+    bm25_index = BM25Index(all_docs)
+    bm25_rank_positions = bm25_index.rank(question)
+
+    fused = reciprocal_rank_fusion(
+        semantic_rank_positions,
+        bm25_rank_positions,
+        weights=[1.0, bm25_weight],
+    )
+
+    results: list[Result] = []
+    for pos, _fused_score in fused[:top_k]:
+        doc_id = all_ids[pos]
+        meta = all_metas[pos]
+        results.append(
+            Result(
+                text=all_docs[pos],
+                source=str(meta.get("source", "unknown")),
+                label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
+                distance=float(distance_by_id.get(doc_id, float("nan"))),
+                produced_by=str(meta.get("produced_by", "unknown")),
+            )
+        )
+    return results
+
+
 def index_exists(corpus: str | None = None, variant: str = "default") -> bool:
     """Is there an index here to search, without searching it?
 
