@@ -347,7 +347,3 @@ but you may disagree with that approach.
 Honestly, only thing I'd do differently is make sure I do some of the activities during class,
 so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it. Well ok another thing is to use that extra time to experiment with different methods
 for the expects column so I'm not using substring to find keywords, but instead use a more intuitive method that uses something like regex patterns.
-
-```
-
-```
