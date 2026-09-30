@@ -245,23 +245,10 @@ Printed from run_eval.py
 
 ## Diagnoses
 
-<!-- For each miss: which stage caused it, and how. The stage alone isn't
-     enough — you need the mechanism.
-
-     Not a diagnosis: "Question 3 didn't work."
-     A diagnosis:     "Question 3 asks about laundry costs. The answer is in
-                       one sentence that got split across two chunks, so
-                       neither chunk on its own contains it."
-
-     The five stages: loading → chunking → embedding → retrieval → generation.
-
-     Look for a pattern. If three misses all ask about numbers, that's one
-     problem, not three.
-
-     Missed nothing? Say so, then say honestly whether your targets were set
-     low, and which one you'd tighten and to what.
-
-     Milestone 3. -->
+I missed criterion 5 because of this: specifying at least 3 documents containing
+the topic I'm looking for means questions that narrowly only need one source document to answer will fail, but that doesn't mean it didn't get the right answer. I don't think the problem
+were the questions in this case, but in the fact I specified 3 documents containing the topic.
+So i'll change this criterion to find if any source documents contained the question topic prefix.
 
 ## The Improvement
 
