@@ -115,11 +115,12 @@ def main():
                 question, top_k, threshold, corpus, args.variant
             )
             passed = judge(question, expects, answer, results, gate_rows) if judge else None
-            run_results.append(passed)
+            run_results.append(all(passed))
 
-            mark = {True: "pass", False: "fail", None: "—"}[passed]
-            print(f"  run {run}: {mark}  (best distance {decision.best_distance:.3f})")
-
+            for crit in range(0,5):
+                mark = {True: "pass", False: "fail", None: "—"}[passed[crit]]
+                print(f" criterion #{crit+1} run {run}: {mark}  (best distance {decision.best_distance:.3f})")
+            print("-"*50)
             transcript.append(
                 {
                     "question": question,
@@ -207,6 +208,7 @@ def write_report(rows, transcript, gate_rows, args, corpus, top_k, threshold, sc
     for row in rows:
         cells = []
         for passed in row["runs"]:
+
             cells.append({True: "pass", False: "fail", None: " "}[passed])
         question = row["question"].replace("|", "\\|")
         lines.append(f"| {question} | {' | '.join(cells)} |")

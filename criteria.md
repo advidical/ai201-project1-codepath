@@ -23,12 +23,11 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-
-<!-- I picked 4 of 5 because one of my questions is about a
-     topic that includes two different prefix documents, admin & dining.
-     I want to see if the model can understand the relationship between
-     dining prefix documents and admin_dining documents and provide at least
-     specific points of the campus dining experience. -->
+I picked 4 of 5 because one of my questions is about a
+topic that includes two different prefix documents, admin & dining.
+I want to see if the model can understand the relationship between
+dining prefix documents and admin_dining documents and provide at least
+specific points of the campus dining experience.
 
 ---
 
@@ -37,9 +36,8 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-
-<!-- I want to understand the model and what it gets right and wrong,
-     as in understanding how it adapts to scope. -->
+I want to understand the model and what it gets right and wrong,
+as in understanding how it adapts to scope.
 
 ---
 
@@ -49,17 +47,15 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
-<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
-     `questions.py`, and `run_eval.py` puts them through the gate and writes
-     what happened into your run log. Swap them for your own if you'd rather —
-     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
+The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
+`questions.py`, and `run_eval.py` puts them through the gate and writes
+what happened into your run log. Swap them for your own if you'd rather —
+just keep five of them, or the "4 of 5" above has nothing to be 4 of.
 
 **Why this target:**
-
-<!-- My question regarding dining experience at campus is very general and does ask
+My question regarding dining experience at campus is very general and does ask
 for an overall view, so I want to see if it will simply say it cannot make that assessment,
 or will say that plus some specific info from the documents to at least provide relevant info
--->
 
 ---
 
@@ -69,14 +65,12 @@ Every chunk should at minimum contain one header and one sentence,
 with a chunk size of ~350 chars.
 
 **Why this target:**
-
-<!-- I wanted the chunks to reflect the average char count of the
-     campus corpus since it's very short blurbs of info from students, but
-     be able to account for questions requiring multiple sources.
-     Using the default chunk function, I know avg doc size is 320 chars, and
-     longest doc is ~550 chars. This make 350 chars ideal to make chunks concise,
-     and make longer docs have more chunks dedicated to denote more info.
--->
+I wanted the chunks to reflect the average char count of the
+campus corpus since it's very short blurbs of info from students, but
+be able to account for questions requiring multiple sources.
+Using the default chunk function, I know avg doc size is 320 chars, and
+longest doc is ~550 chars. This make 350 chars ideal to make chunks concise,
+and make longer docs have more chunks dedicated to denote more info.
 
 ---
 
@@ -85,10 +79,13 @@ with a chunk size of ~350 chars.
 For at least 4 of 5 test questions, all 3 top-ranked retrieved documents have the same predefined topic prefix as the test question (e.g., an admin question retrieves only admin documents).
 
 **Why this target:**
+I want my questions to pull the right topic(s) relevant to the question, and see
+how well or badly it does doing so.
 
-<!--I want my questions to pull the right topic(s) relevant to the question, and see
-    how well or badly it does doing so. ->
----
+**Revised in unit 2:** For at least 4 of 5 test questions, at least 1 top-ranked retrieved documents have the same predefined topic prefix as the test question (e.g., an admin question retrieves only admin documents).
+
+**Why revised:** I wanted to account for questions that only need 1 source document to answer
+the question accurately, ie very narrow questions regarding a narrow specific topic.
 
 <!-- ─────────────────────────────────────────────────────────────────────────
      UNIT 2 — read this before you change anything above.

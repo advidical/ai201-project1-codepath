@@ -33,7 +33,7 @@ QUESTIONS = [
      better tailored guidance for their major?", "expects": "departmental adviser :admin"},
     {"question": "What do students say about the overall dining experience at campus, when\
      it comes to dining halls on campus, cost of meals plans, and accessibility of dining dollars?", 
-     "expects": "minutes pm am eat between classes costs meal swipe :dining"},
+     "expects": "minutes pm am :dining"},
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.

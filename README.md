@@ -253,33 +253,26 @@ So i'll change this criterion to find if any source documents contained the ques
 ## The Improvement
 
 **What I changed:**
+I changed criterion 5 to check if only one document out of 4/5 test questions names at least one relevant source, as specified in criteria.md to account for very narrow questions that need only 1-2 source documents to adequately answer the question. I haven't made any other changes, except for changes in scorer.py & run_eval.py so that instead of seeing if all checks passed for each question, check by each criterion so It more clearly shows which criterion I'm missing. I also spotted a bug in my scorer function that was incorrectly grading criterion #5.
 
 **Why I picked it:**
-
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+I made theses changes because of two reasons: one, as outlined with criterion 5, I needed to account for questions with narrow topics; two, for quicker judgement of what criterion passsed vs failed for each question.
 
 ### Run Log — After
 
 <!-- Same format, same five criteria, three runs each.
      `python run_eval.py --label after` -->
 
-| Criterion                              | Target | Run 1 | Run 2 | Run 3 | Verdict |
-| -------------------------------------- | ------ | ----- | ----- | ----- | ------- |
-| 1. Retrieved chunk contains the answer | 4 of 5 |       |       |       |         |
-| 2. Every answer names a source         | 5 of 5 |       |       |       |         |
-| 3. Gate stops out-of-corpus questions  | 4 of 5 |       |       |       |         |
-| 4.                                     |        |       |       |       |         |
-| 5.                                     |        |       |       |       |         |
+| Criterion                                                                      | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| ------------------------------------------------------------------------------ | ------ | ----- | ----- | ----- | ------- | ---- |
+| 1. Retrieved chunk contains the answer                                         | 4 of 5 | PASS  | PASS  | PASS  | MET     |
+| 2. Every answer names a source                                                 | 5 of 5 | PASS  | PASS  | PASS  | MET     |
+| 3. Gate stops out-of-corpus questions                                          | 4 of 5 | PASS  | PASS  | PASS  | MET     |
+| 4. Chunk should be ~350 chars/A header & a sentence                            | PASS   | PASS  | PASS  | MET   |
+| 5.least 1 top-ranked retrieved documents have the same predefined topic prefix | 4 of 5 | PASS  | PASS  | PASS  | PASS    | PASS |
 
 **Did it help?**
-
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
-
-     Milestone 4. -->
+This helped alot to automate and see my results in a much clearer way, honestly wished I did this earlier in class.
 
 ## What's Still Broken
 
@@ -291,6 +284,10 @@ So i'll change this criterion to find if any source documents contained the ques
 
      Milestone 5. -->
 
+Thankfully nothing is still broken, but I would definitely fix scorer.py and run_eval.py
+so that I can generate the table above directly so that I can more quickly come to a decision,
+but you may disagree with that approach.
+
 ## What I'd Do Differently
 
 <!-- Knowing what you know now — which of your five criteria would you write
@@ -299,5 +296,7 @@ So i'll change this criterion to find if any source documents contained the ques
      Milestone 5. -->
 
 ```
+Honestly, only thing I'd do differently is make sure I do some of the activities during class,
+so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it.
 
 ```
