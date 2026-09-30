@@ -66,7 +66,7 @@ or will say that plus some specific info from the documents to at least provide 
 ## 4. Chunks reflect the size of corpus docs
 
 Every chunk should at minimum contain one header and one sentence,
-with a chunk size of ~350 chars
+with a chunk size of ~350 chars.
 
 **Why this target:**
 

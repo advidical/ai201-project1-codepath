@@ -30,6 +30,14 @@
 
      Milestone 5. -->
 
+I picked the campus_life corpus since I felt it was the simplest corpus to work with, and
+it contains small documents so it means smaller size chuncks.
+I used a chunking strategy that splits content first by lines, then by sentences up to
+around 350 chars, with a 50 char (which is ~1-2 sentences) overlap.
+My system answers questions about what students are talking about in regards to school admin,
+the dining experience, housing, transit, courses, etc. It can answer both very specific questions,
+and can answer overall experience of certain aspects of campus life.
+
 ## Chunking Strategy
 
 **Chunk size: 350 chars**
@@ -53,15 +61,6 @@ with a guranteed one sentence (even if it goes over). I used claude to help fini
 
 ## Sample Chunks
 
-<!-- Five chunks, pasted as text. Label each one and name the file it came from
-     AND the function that produced it — the grader checks your code against
-     what you claim here.
-
-     `python app.py chunks -n 5` prints all three for you. Copy them straight
-     across.
-
-     Milestone 3. -->
-
 **Chunk 1** — source: admin_add_drop_deadline.txt#0 ` — produced by: chunker.py::split_documents`
 On the add/drop deadline
 You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
@@ -84,9 +83,6 @@ Asked about this a lot so writing it down. Moderate; the building is l-shaped an
 
 ## Sample Answer
 
-<!-- One complete question and answer, pasted as text, with the source line
-     visible. Milestone 4. -->
-
 **Question: What do students say about the quality & selection of food at \
  the Kestral Commons during lunch?**
 
@@ -108,22 +104,13 @@ Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.t
 
 **My relevance cutoff:**
 
-<!-- The number you set in config.py, and how you got there.
-
-     You ran five questions your corpus covers and the five in OUT_OF_SCOPE
-     that it clearly doesn't, and wrote down the best distance for each. What
-     did those two groups look like? Where was the gap? Put the actual numbers
-     here — the table below wants all ten rows.
-
-     Milestone 4. -->
-
-     So I decided to keep my relevance cutoff around 0.6 since it seems that
-     it's well within my gap between my questions and the out of scope questions
-     I will note that I did change one of my questions halfway through, but I kept one
-     that is above the relevance cutoff and decided to keep it since it's an example of a
-     question that the corpus could've answered but didn't have enough relevant information
-     to reach that consensus, which I thought was very interesting but ultimately made sense
-     given the context and the fact the docs don't talk much about the advisors.
+So I decided to keep my relevance cutoff around 0.6 since it seems that
+it's well within my gap between my questions and the out of scope questions
+I will note that I did change one of my questions halfway through, but I kept one
+that is above the relevance cutoff and decided to keep it since it's an example of a
+question that the corpus could've answered but didn't have enough relevant information
+to reach that consensus, which I thought was very interesting but ultimately made sense
+given the context and the fact the docs don't talk much about the advisors.
 
 | Question                                                                                                                                                              | In corpus?   | Best distance |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------------- |
@@ -140,15 +127,6 @@ Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.t
 |                                                                                                                                                                       |              |               |
 
 ## How I Used AI
-
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
-
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
 
 **1. I asked claude to help me make the chunking function based on what I was after:
 Creating a chunking strategy that seperated the docs by lines, then chunked by sentences.
@@ -185,17 +163,66 @@ my questions into a document. It did save me time. I didn't really change anythi
 
      Milestone 1. -->
 
-| Criterion                              | Target | Run 1 | Run 2 | Run 3 | Verdict |
-| -------------------------------------- | ------ | ----- | ----- | ----- | ------- |
-| 1. Retrieved chunk contains the answer | 4 of 5 |       |       |       |         |
-| 2. Every answer names a source         | 5 of 5 |       |       |       |         |
-| 3. Gate stops out-of-corpus questions  | 4 of 5 |       |       |       |         |
-| 4.                                     |        |       |       |       |         |
-| 5.                                     |        |       |       |       |         |
+| Criterion                                                    | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| ------------------------------------------------------------ | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer                       | 4 of 5 | 4/5   | 4/5   | 4/5   | MET     |
+| 2. Every answer names a source                               | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 3. Gate stops out-of-corpus questions                        | 4 of 5 | 6/5   | 6/5   | 6/5   | MET     |
+| 4. Chunk should be ~350 chars/A header & a sentence          | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 5. 3 top-ranked retrieved documents cover the relevant topic | 4 of 5 | 3/5   | 3/5   | 3/5   | MISSED  |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+
+### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 1
+
+- Best distance: 0.4519 (passed the gate)
+- Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_ridgeway_cafe_followup.txt
+
+```
+Students mention that the stir-fry station is made to order and is worth going for, but also note that the salad bar wilts after 1:30.
+
+This information comes from the document `dining_kestrel_commons.txt`.
+
+### What do students say about the amount of study time needed outside of class     each week for computer science courses? — run 1
+
+- Best distance: 0.4077 (passed the gate)
+- Sources retrieved: course_cs_210.txt, course_cs_210_workload.txt, course_cs_340.txt, course_econ_101_workload.txt, course_stat_150_workload.txt
+
+```
+
+For CS 210 Data Structures, students can expect 8 to 10 hours a week outside of class (source: `course_cs_210_workload.txt` and `course_cs_210.txt`). For CS 340 Databases, students can expect about 6 hours a week early on, increasing to 15 hours a week in the last three weeks when the project lands (source: `course_cs_340.txt`).
+
+### What do students say about the accessibility & operating hours of the transit shuttle on campus? — run 1
+
+- Best distance: 0.3749 (passed the gate)
+- Sources retrieved: housing_aldridge_hall_noise.txt, study_library_hours.txt, transit_shuttle.txt, transit_walking.txt
+
+```
+Based on the provided documents, the campus shuttle runs a loop every 20 minutes from 7 am to 11 pm on weekdays and every 40 minutes on weekends. It is free with a student ID, and the published timetable is optimistic by about five minutes in the morning while accurate the rest of the day. Additionally, the stop outside Fenwick Court is skipped when the driver is behind.
+
+Source: *transit_shuttle.txt*
+
+### What do students recommend to do to have access to advisers with      better tailored guidance for their major? — run 1
+
+- Best distance: 0.7251 (refused by the gate)
+- Sources retrieved: admin_declaring_a_major.txt, course_cs_340.txt, course_econ_101.txt, money_textbooks.txt
+
+```
+
+I don't have enough information about that.
+
+### What do students say about the overall dining experience at campus, when it comes to dining halls on campus, cost of meals plans, and accessibility of dining dollars? — run 1
+
+- Best distance: 0.4335 (passed the gate)
+- Sources retrieved: admin_dining_dollars.txt, admin_meal_plan_changes.txt, dining_pellew_dining_hall.txt, dining_verrill_street_grill.txt, money_jobs.txt
+
+```
+Based on the provided documents, Pellew Dining Hall costs one meal swipe or $11.75 in cash, and it is located next to the athletics centre (*dining_pellew_dining_hall.txt*). Regarding meal plan changes, students can change their tier once within the first ten days of the semester; downgrading refunds the difference, while upgrading bills immediately (*admin_meal_plan_changes.txt*). As for dining dollars (declining balance), they roll over from the autumn semester to the spring, but any funds left in May disappear and do not roll over to the following autumn (*admin_dining_dollars.txt*).
+```
+
+Printed from run_eval.py
 
 ## Verdicts
 
@@ -208,13 +235,13 @@ my questions into a document. It did save me time. I didn't really change anythi
 
      Milestone 2. -->
 
-| #   | Criterion | Verdict | How I decided |
-| --- | --------- | ------- | ------------- |
-| 1   |           |         |               |
-| 2   |           |         |               |
-| 3   |           |         |               |
-| 4   |           |         |               |
-| 5   |           |         |               |
+| #   | Criterion                                                 | Verdict | How I decided                         |
+| --- | --------------------------------------------------------- | ------- | ------------------------------------- |
+| 1   | Retrieved chunk contains the answer                       | MET     | results from run_eval.py,did by hand. |
+| 2   | Every answer names a source                               | MET     | results from run_eval.py,did by hand. |
+| 3   | Gate stops out-of-corpus questions                        | MET     | results from run_eval.py,did by hand. |
+| 4   | Chunk should be ~350 chars/A header & a sentence          | MET     | results from run_eval.py,did by hand. |
+| 5   | 3 top-ranked retrieved documents cover the relevant topic | MISSED  | results from run_eval.py,did by hand. |
 
 ## Diagnoses
 
@@ -283,3 +310,7 @@ my questions into a document. It did save me time. I didn't really change anythi
      differently, and why?
 
      Milestone 5. -->
+
+```
+
+```

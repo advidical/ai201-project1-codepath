@@ -102,6 +102,8 @@ def main():
     transcript = []
     rows = []
 
+    gate_rows = check_out_of_scope(top_k, threshold, corpus, args.variant)
+
     for item in items:
         question = item["question"]
         expects = item.get("expects", "")
@@ -112,7 +114,7 @@ def main():
             answer, results, decision = run_once(
                 question, top_k, threshold, corpus, args.variant
             )
-            passed = judge(question, expects, answer, results) if judge else None
+            passed = judge(question, expects, answer, results, gate_rows) if judge else None
             run_results.append(passed)
 
             mark = {True: "pass", False: "fail", None: "—"}[passed]
@@ -130,8 +132,6 @@ def main():
             )
 
         rows.append({"question": question, "expects": expects, "runs": run_results})
-
-    gate_rows = check_out_of_scope(top_k, threshold, corpus, args.variant)
 
     write_report(
         rows, transcript, gate_rows, args, corpus, top_k, threshold,
