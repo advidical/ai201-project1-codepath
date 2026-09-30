@@ -295,8 +295,5 @@ but you may disagree with that approach.
 
      Milestone 5. -->
 
-```
 Honestly, only thing I'd do differently is make sure I do some of the activities during class,
 so that I'm not rushing last minute for submission, & I have a better idea of the project before attempting it.
-
-```
