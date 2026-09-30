@@ -263,13 +263,105 @@ I made theses changes because of two reasons: one, as outlined with criterion 5,
 <!-- Same format, same five criteria, three runs each.
      `python run_eval.py --label after` -->
 
-| Criterion                                                                      | Target | Run 1 | Run 2 | Run 3 | Verdict |
-| ------------------------------------------------------------------------------ | ------ | ----- | ----- | ----- | ------- | ---- |
-| 1. Retrieved chunk contains the answer                                         | 4 of 5 | PASS  | PASS  | PASS  | MET     |
-| 2. Every answer names a source                                                 | 5 of 5 | PASS  | PASS  | PASS  | MET     |
-| 3. Gate stops out-of-corpus questions                                          | 4 of 5 | PASS  | PASS  | PASS  | MET     |
-| 4. Chunk should be ~350 chars/A header & a sentence                            | PASS   | PASS  | PASS  | MET   |
-| 5.least 1 top-ranked retrieved documents have the same predefined topic prefix | 4 of 5 | PASS  | PASS  | PASS  | PASS    | PASS |
+Fixing the scorer script's answer-splitting logic.
+
+Yes exactly — rsplit(":", 1) gives you ['money cheap salad wilt', 'dining'], so expects_answer is bound to the string 'money cheap salad wilt' as one single string, not a list. for word in expects_answer then walks it character by character ('m', 'o', 'n', 'e', 'y', ' ', 'c'...) exactly like before — the rsplit fixed the topic-separation problem, but didn't touch the word-separation problem, since that's a completely separate split happening on a different character (space vs. colon).
+
+.split() (no arguments) splits on whitespace and gives you ['money', 'cheap', 'salad', 'wilt'] — that's the list you actually want to loop over.
+
+Here's the updated file with that fix, keeping your store import, your rsplit line, and criteria 2-5 still stubbed for you to build next:
+
+That confirms it: 'lunch selection' now correctly matches (word-by-word), and 'ibuprofen dosage' correctly fails, instead of the old character-level check that would've let almost anything through.
+
+Whenever you're ready to tackle criterion 5 with the "generated topic is a substring of the filename" rule you described, expects_topic is already unpacked and waiting for you in judge() — just uncomment that line once \_top3_share_topic_prefix exists.
+
+Scorer
+PY 
+
+[context for gate_rows]: gate rows is list{dict] with this structure for each item : {
+"question": question,
+"refused": refused,
+"best_distance": decision.best_distance,
+} [updated_file]: # Scorer.py : used to determine criterion results
+from store import Result
+def judge(question: str,expects: str, answer: str, results: list[Result],
+) -> bool:
+"""
+Returns True only if ALL criteria pass: 1. Retrieved chunks contain the answer <- implemented 2. Every answer names at least one source document <- TODO 3. The relevance gate stops out-of-corpus questions <- TODO 4. Chunks reflect the size of corpus docs <- TODO 5. Top-3 retrieved docs share the question's topic prefix <- TODO
+"""
+def \_retrieved_chunks_contain_expected(expects_keywords: str, results: list[Result]):
+my_results = [r.text for r in results]
+expected_words = expects_keywords.split() # split into list of words to expect
+return all(any(word in text for text in my_results) for word in expected_words)
+
+    def _answer_names_a_source(answer: str):
+        return ".txt" in answer
+
+    def _gate_behaves_correctly(gate_rows:list):
+        gate_results = [decision['refused'] for decision in gate_rows]
+        return all(gate_results)
+
+    def _chunks_are_reasonably_sized(results):
+        my_results = [r.text for r in results]
+
+    def _top3_share_topic_prefix(question, results):
+        ...
+
+    expects_keywords, expects_topic = expects.rsplit(":", 1)
+    checks = [
+        _retrieved_chunks_contain_expected(expects_keywords, results),
+        # _answer_names_a_source(answer, results),
+        # _gate_behaves_correctly(question, expects, results),
+        # _chunks_are_reasonably_sized(results),
+        # _top3_share_topic_prefix(question, results),
+    ]
+    return all(checks) [task] : ok running low on time so I need you to finish criterion 4 and 5 checks for me. criterion 4 should return true if all result chunks have at most 400 chars (chunk size + overlap == 350 +50 = 400), and for criterion 5, have it check expects_topic is a substring in the results, using the source attribute in dataclass Result (that I provided earlier but here it is for reference, @dataclass
+
+class Result:
+"""One retrieved chunk and how far it was from the question."""
+
+    text: str
+    source: str
+    label: str
+    distance: float   # LOWER IS BETTER. 0.3 is close, 0.9 is unrelated.
+    produced_by: str
+
+All tests pass, including the vacuous-true edge case for refused questions with empty results.
+
+Two things worth 10 seconds of attention before you submit, not blockers, just flagging:
+
+The commented-out lines for #2 and #3 in checks don't match their function signatures. \_answer_names_a_source takes only answer, but the commented call passes (answer, results). \_gate_behaves_correctly takes gate_rows, but the commented call passes (question, expects, results). If you uncomment those later without fixing the call arguments, you'll get a TypeError, not a silent wrong answer — so it'll be obvious, but worth knowing now rather than mid-panic later. Also \_gate_behaves_correctly needs gate_rows threaded into judge()'s parameters somewhere, since it's not currently one of judge's inputs.
+\_top3_share_topic_prefix only checks results[:3] — if results has fewer than 3 items (e.g. a borderline case that returns 1-2 chunks without being fully refused), it'll still pass as long as whatever's there matches, since all() over a shorter list is still vacuously satisfied for the missing slots. Decide if that's the behavior you want or if you'd rather require len(results) >= 3 explicitly.
+Scorer
+PY 
+
+| ok quickly, take this table and find what's wrong with it because on my read.md file it's not turning into a table | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| ------------------------------------------------------------------------------------------------------------------ | --------- | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer                                                                             | 4 of 5    | PASS   | PASS  | PASS  | MET   |
+| 2. Every answer names a source                                                                                     | 5 of 5    | PASS   | PASS  | PASS  | MET   |
+| 3. Gate stops out-of-corpus questions                                                                              | 4 of 5    | PASS   | PASS  | PASS  | MET   |
+| 4. Chunk should be ~350 chars/A header & a sentence                                                                | PASS      | PASS   | PASS  | MET   |
+| 5.least 1 top-ranked retrieved documents have the same predefined topic prefix                                     | 4 of 5    | PASS   | PASS  | PASS  | PASS  | PASS    |
+
+Two separate problems are breaking it:
+
+1. Your separator row has 7 columns, but your header row only has 6. Markdown tables require the header, separator, and every body row to have the same number of |-separated cells, or the parser gets confused and either mis-renders or refuses to render as a table at all. Your separator: | ------ | ------ | ----- | ----- | ----- | ------- | ---- | — that's 7 cells against a 6-column header (Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict).
+
+2. Two of your rows also have the wrong number of cells:
+
+Row 4 has only 5 cells (4. Chunk should be... , PASS, PASS, PASS, MET) — one short. It's missing a value in the Target column, so everything after it shifts left by one.
+Row 5 has 7 cells (ends in PASS | PASS, doubled) — one too many.
+
+Here's the corrected structure — I filled row 4's Target with a placeholder and dropped the duplicate PASS from row 5, but you should double check those two against your actual numbers since I'm guessing at what you meant there:
+
+markdown
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| -------------------------------------------------------------------------------- | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer | 4 of 5 | PASS | PASS | PASS | MET |
+| 2. Every answer names a source | 5 of 5 | PASS | PASS | PASS | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | PASS | PASS | PASS | MET |
+| 4. Chunk should be ~350 chars/A header & a sentence | 5 of 5 | PASS | PASS | PASS | MET |
+| 5. At least 1 top-ranked retrieved document has the same predefined topic prefix | 4 of 5 | PASS | PASS | PASS | MET |
 
 **Did it help?**
 This helped alot to automate and see my results in a much clearer way, honestly wished I did this earlier in class.
