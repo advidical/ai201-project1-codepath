@@ -276,7 +276,7 @@ Based on the documents, students advise booking an appointment with your adviser
 Source: `advising_registration.txt`
 ```
 
-Generated from run_eval.py
+Generated from run_eval.py using main()
 
 ## Diagnoses
 
@@ -312,11 +312,11 @@ I made theses changes because of two reasons:
 
 | Criterion                                                                        | Target | Run 1 | Run 2 | Run 3 | Verdict |
 | -------------------------------------------------------------------------------- | ------ | ----- | ----- | ----- | ------- |
-| 1. Retrieved chunk contains the answer                                           | 4 of 5 | PASS  | PASS  | PASS  | MET     |
-| 2. Every answer names a source                                                   | 5 of 5 | PASS  | PASS  | PASS  | MET     |
-| 3. Gate stops out-of-corpus questions                                            | 4 of 5 | PASS  | PASS  | PASS  | MET     |
-| 4. Chunk should be ~350 chars/A header & a sentence                              | 5 of 5 | PASS  | PASS  | PASS  | MET     |
-| 5. At least 1 top-ranked retrieved document has the same predefined topic prefix | 4 of 5 | PASS  | PASS  | PASS  | MET     |
+| 1. Retrieved chunk contains the answer                                           | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 2. Every answer names a source                                                   | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 3. Gate stops out-of-corpus questions                                            | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 4. Chunk should be ~350 chars/A header & a sentence                              | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 5. At least 1 top-ranked retrieved document has the same predefined topic prefix | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
 
 **Did it help**
 Yes! criterion #5 now passes for all questions, & tightening the ground prompt for question #4 did
@@ -410,6 +410,14 @@ out for common stop words & contractions.
 
 ## Run after fix
 
+| Criterion                                                                        | Target | Run 1 | Run 2 | Run 3 | Verdict |
+| -------------------------------------------------------------------------------- | ------ | ----- | ----- | ----- | ------- |
+| 1. Retrieved chunk contains the answer                                           | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 2. Every answer names a source                                                   | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 3. Gate stops out-of-corpus questions                                            | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 4. Chunk should be ~350 chars/A header & a sentence                              | 5 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+| 5. At least 1 top-ranked retrieved document has the same predefined topic prefix | 4 of 5 | 5/5   | 5/5   | 5/5   | MET     |
+
 ### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 1
 
 - Best distance: 0.4348 (passed the gate)
@@ -442,3 +450,5 @@ Students mention that the stir-fry station (which is made to order) is worth goi
 
 Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
 ```
+
+Generated from run_eval.py using main()
