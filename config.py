@@ -43,7 +43,7 @@ TOP_K = 5               # how many chunks to pull back per question
 # 0.6 is a reasonable starting point, not a right answer. Milestone 4 has you
 # measure your own two groups of distances and put the cutoff in the gap.
 # Most corpora land somewhere between 0.45 and 0.75.
-THRESHOLD = 0.6
+THRESHOLD = 0.6 # .735
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ THRESHOLD = 0.6
 # stretch option — switches to loading that model from Hugging Face instead,
 # which needs `pip install 'sentence-transformers>=3.4,<3.5'` first. store.py
 # says so with a real error message rather than a stack trace if you forget.
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "all-MiniLM-L6-v2" #"paraphrase-multilingual-MiniLM-L12-v2"
 MODEL = os.getenv("AI201_MODEL", "gemini-3.5-flash-lite")
 
 

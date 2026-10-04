@@ -26,7 +26,8 @@ from dataclasses import dataclass
 
 import config
 from ingest import Document
-
+import nltk
+from functools import lru_cache
 
 @dataclass
 class Chunk:
@@ -83,19 +84,23 @@ def fallback_split(
 """
 split_documents — a header-anchored, sentence-aware chunking strategy.
 """
-import nltk
 
-# nltk's sentence tokenizer needs a one-time data download ("punkt_tab" as of
-# nltk >= 3.9; older nltk versions use "punkt"). This check-then-download
-# pattern means the download only happens once per machine, not once per call.
-try:
-    nltk.data.find("tokenizers/punkt_tab")
-except LookupError:
-    nltk.download("punkt_tab", quiet=True)
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def _ensure_nltk_ready() -> None:
+    # nltk's sentence tokenizer needs a one-time data download ("punkt_tab" as of
+    # nltk >= 3.9; older nltk versions use "punkt")
+    # Download only happens once per machine, not once per call
+    try:
+        nltk.data.find("tokenizers/punkt_tab")
+    except LookupError:
+        nltk.download("punkt_tab", quiet=True)
 
 
 def _split_into_sentences(line: str) -> list[str]:
     """Split a single line into sentence-sized pieces, dropping empties."""
+    _ensure_nltk_ready()
     pieces = nltk.sent_tokenize(line.strip())
     return [p.strip() for p in pieces if p.strip()]
 

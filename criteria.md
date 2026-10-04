@@ -29,6 +29,16 @@ I want to see if the model can understand the relationship between
 dining prefix documents and admin_dining documents and provide at least
 specific points of the campus dining experience.
 
+**Revision Post Second Model Implementation:** Retrieved chunks & output contain the answer
+
+For at least 4 of my 5 test questions, the retrieved chunks and/or my model output include one that
+contains the answer.
+
+**Why revised:** I wanted to account for embedding models that are able to get the correct answer through context
+but will use chunks that may or may not contain all the expected words due to the quirks of how the chunking strategy
+interacts with the model. This also could be addressed via increasing the top k chunks, but I thought this was a more
+intuitive change based on my second embedding model choice _paraphrase-multilingual-MiniLM-L12-v2_
+
 ---
 
 ## 2. Every answer names a source

@@ -25,9 +25,6 @@
      questions your system answers. Write it for someone who has never seen
      this repo.
 
-     I chose the campus corpus for the relatively small chunking size I could use
-     to curate my chunks.
-
      Milestone 5. -->
 
 I picked the campus_life corpus since I felt it was the simplest corpus to work with, and
@@ -145,6 +142,60 @@ my questions into a document. It did save me time. I didn't really change anythi
 
 ---
 
+## Stretch Feature: Second embedding model
+
+For testing second sentence transformer embedding model, I used paraphrase-multilingual-MiniLM-L12-v2,
+as it's pretty similar to the mini lm model, & I am bilingual so I was interested in using a model
+that understood multiple languages.
+
+## issues when implementing
+
+1. **Adjusting the gate** : when initially retrieving chunks and running evaluation, I saw that true answers tended to lie above .6, so I adjusted it to near the maximum of .75 to get answers, as otherwise it still gated out the OUT OF SCOPE questions.
+2. **Adding fuzzy matching via nltk.stem.PorterStemmer**: I needed a more intuitive way to match words to thoroughly test expects w/o making adjustments between models for the expects field. I went w/ using nltk since I already use it in this project & claude confirmed it was sufficient for my task, which I eventually confirmed for myself when debugging and fixing
+   the rest of the issues.
+3. **Bugs w/ scorer.py implementation** : Basically, one of my questions was consistently failing criterion #1, and I was really stuck for awhile because I was seemingly getting the right answer, but my scorer didn't seem to see that.
+   I had to use print statements and set methods to figure out the root of the issue, & through claude, I found that
+   my criterion #1 function was flawed when claude generated it, as it checked the **_CHUNKS_** for matching the expected
+   words, not the answer. That was criterion #1's goal, but I realized that with this particular model (through talking my
+   debugging w/ claude), that this particular model paraphrases, and the way my chunking strategy works, it was getting some of the right chunks, but the chunk that included one of the expected keywords weren't in the top 5. I
+   think adjustments to top k will fix that, but I thought it would be better to modify criterion #1 so that either the
+   **_Retrieved Chunks_** or the **_Model Output_** to account for models that may paraphrase more heavily & even provide
+   the missing keywords from context. This is probably the most controversial change, but I will stand by it
+
+## Sample Output
+
+## Run log — test_control
+
+### What do students say about the overall dining experience at campus, when it comes to dining halls on campus, cost of meals plans, and accessibility of dining dollars? — run 2
+
+- Best distance: 0.4335 (passed the gate)
+- Sources retrieved: admin_dining_dollars.txt, admin_meal_plan_changes.txt, dining_pellew_dining_hall.txt, dining_verrill_street_grill.txt, money_jobs.txt
+
+```
+Based on the provided documents:
+
+* **Dining halls:** Pellew Dining Hall is the furthest hall from anywhere, located next to the athletics centre, open from 7:00 am to 8:00 pm daily, and costs one meal swipe or $11.75 cash (*dining_pellew_dining_hall.txt*). Verrill Street Grill features the only late-night hot food on campus and has a single-line queue (*dining_verrill_street_grill.txt*). Library jobs in dining do not allow you to study during the shift (*money_jobs.txt*).
+* **Cost of meal plans:** You can change your meal plan tier once in the first ten days of the semester; downgrading refunds the difference to your student account, while upgrading bills you immediately (*admin_meal_plan_changes.txt*).
+* **Accessibility of dining dollars:** Declining balance (dining dollars) rolls over from the autumn semester to the spring, but does not roll over from spring to the following autumn, so whatever is left in May disappears (*admin_dining_dollars.txt*).
+```
+
+## Run log — test_hybrid
+
+### What do students say about the overall dining experience at campus, when it comes to dining halls on campus, cost of meals plans, and accessibility of dining dollars? — run 3
+
+- Best distance: 0.7064 (passed the gate)
+- Sources retrieved: admin_dining_dollars.txt, dining_pellew_dining_hall.txt, dining_pellew_dining_hall_followup.txt, housing_tamsin_court.txt, money_jobs.txt
+
+```
+Based on the provided documents, students note that Pellew Dining Hall has peak wait times of 12 to 18 minutes, is the furthest dining hall from everything (located next to the athletics centre), and costs one meal swipe or $11.75 in cash per meal (*dining_pellew_dining_hall.txt* and *dining_pellew_dining_hall_followup.txt*). Regarding dining dollars, declining balances roll over from the autumn semester to the spring semester, but any remaining amount in May disappears and does not roll over to the following autumn (*admin_dining_dollars.txt*).
+```
+
+## Future considerations
+
+1. Make sure to understand regex patterns & how to manipulate them more, as it could be useful to get certain format tokens
+   such as dollar values & date times (which I did implement for scorer.py)
+2. Make sure to look more into fuzzy match implementations & how to build a more intuitive system for validating my answers
+
 # Unit 2
 
 <!-- These sections get ADDED to what's already above. Don't delete or rewrite
@@ -181,11 +232,12 @@ my questions into a document. It did save me time. I didn't really change anythi
 - Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_ridgeway_cafe_followup.txt
 
 ```
+
 Students mention that the stir-fry station is made to order and is worth going for, but also note that the salad bar wilts after 1:30.
 
 This information comes from the document `dining_kestrel_commons.txt`.
 
-### What do students say about the amount of study time needed outside of class     each week for computer science courses? — run 1
+### What do students say about the amount of study time needed outside of class each week for computer science courses? — run 1
 
 - Best distance: 0.4077 (passed the gate)
 - Sources retrieved: course_cs_210.txt, course_cs_210_workload.txt, course_cs_340.txt, course_econ_101_workload.txt, course_stat_150_workload.txt
@@ -200,11 +252,12 @@ For CS 210 Data Structures, students can expect 8 to 10 hours a week outside of 
 - Sources retrieved: housing_aldridge_hall_noise.txt, study_library_hours.txt, transit_shuttle.txt, transit_walking.txt
 
 ```
+
 Based on the provided documents, the campus shuttle runs a loop every 20 minutes from 7 am to 11 pm on weekdays and every 40 minutes on weekends. It is free with a student ID, and the published timetable is optimistic by about five minutes in the morning while accurate the rest of the day. Additionally, the stop outside Fenwick Court is skipped when the driver is behind.
 
-Source: *transit_shuttle.txt*
+Source: _transit_shuttle.txt_
 
-### What do students recommend to do to have access to advisers with      better tailored guidance for their major? — run 1
+### What do students recommend to do to have access to advisers with better tailored guidance for their major? — run 1
 
 - Best distance: 0.7251 (refused by the gate)
 - Sources retrieved: admin_declaring_a_major.txt, course_cs_340.txt, course_econ_101.txt, money_textbooks.txt
@@ -219,7 +272,9 @@ I don't have enough information about that.
 - Sources retrieved: admin_dining_dollars.txt, admin_meal_plan_changes.txt, dining_pellew_dining_hall.txt, dining_verrill_street_grill.txt, money_jobs.txt
 
 ```
-Based on the provided documents, Pellew Dining Hall costs one meal swipe or $11.75 in cash, and it is located next to the athletics centre (*dining_pellew_dining_hall.txt*). Regarding meal plan changes, students can change their tier once within the first ten days of the semester; downgrading refunds the difference, while upgrading bills immediately (*admin_meal_plan_changes.txt*). As for dining dollars (declining balance), they roll over from the autumn semester to the spring, but any funds left in May disappear and do not roll over to the following autumn (*admin_dining_dollars.txt*).
+
+Based on the provided documents, Pellew Dining Hall costs one meal swipe or $11.75 in cash, and it is located next to the athletics centre (_dining_pellew_dining_hall.txt_). Regarding meal plan changes, students can change their tier once within the first ten days of the semester; downgrading refunds the difference, while upgrading bills immediately (_admin_meal_plan_changes.txt_). As for dining dollars (declining balance), they roll over from the autumn semester to the spring, but any funds left in May disappear and do not roll over to the following autumn (_admin_dining_dollars.txt_).
+
 ```
 
 Printed from run_eval.py
@@ -251,9 +306,11 @@ Printed from run_eval.py
 - Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
 
 ```
+
 Based on the documents, students advise booking an appointment with your adviser two weeks in advance because they get busy the week before registration opens. You must have your adviser hold lifted before you can register.
 
 Source: `advising_registration.txt`
+
 ```
 
 ### What advice do students most commonly leave when it comes to registering for your courses & picking your adviser? — run 2
@@ -262,7 +319,9 @@ Source: `advising_registration.txt`
 - Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
 
 ```
-Based on the documents, students advise booking an appointment with your adviser two weeks out, because advisers get busy in the week before registration opens, and you need your adviser hold lifted to register (*advising_registration.txt*). Additionally, registration times are staggered by credit hours, and popular courses tend to fill up in the first two days (*advising_registration.txt*).
+
+Based on the documents, students advise booking an appointment with your adviser two weeks out, because advisers get busy in the week before registration opens, and you need your adviser hold lifted to register (_advising_registration.txt_). Additionally, registration times are staggered by credit hours, and popular courses tend to fill up in the first two days (_advising_registration.txt_).
+
 ```
 
 ### What advice do students most commonly leave when it comes to registering for your courses & picking your adviser? — run 3
@@ -271,9 +330,11 @@ Based on the documents, students advise booking an appointment with your adviser
 - Sources retrieved: admin_declaring_a_major.txt, admin_wifi_and_accounts.txt, advising_registration.txt, dining_verrill_street_grill.txt, money_textbooks.txt
 
 ```
+
 Based on the documents, students advise booking an appointment with your adviser two weeks in advance because they get busy in the week before registration opens. You also need to have your adviser hold lifted before you can register.
 
 Source: `advising_registration.txt`
+
 ```
 
 Generated from run_eval.py using main()
@@ -377,7 +438,9 @@ became a problem because it led to criterion #1 failing for one of my questions.
 - Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
 
 ```
+
 Based on the provided documents, students note that the salad bar at Kestrel Commons wilts after 1:30 (dining_kestrel_commons_followup.txt).
+
 ```
 
 ### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 2
@@ -386,9 +449,11 @@ Based on the provided documents, students note that the salad bar at Kestrel Com
 - Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
 
 ```
+
 Students say that the salad bar at Kestrel Commons wilts after 1:30.
 
 Source: dining_kestrel_commons_followup.txt
+
 ```
 
 ### What do students say about the quality & selection of food at the Kestral Commons during lunch? — run 3
@@ -397,9 +462,11 @@ Source: dining_kestrel_commons_followup.txt
 - Sources retrieved: dining_halden_hall_followup.txt, dining_kestrel_commons_followup.txt, dining_north_kitchen_followup.txt, dining_the_atrium_followup.txt, dining_the_ridgeway_cafe_followup.txt
 
 ```
+
 Based on the documents, students note that the salad bar at Kestrel Commons wilts after 1:30.
 
 Source: dining_kestrel_commons_followup.txt
+
 ```
 
 ## The bug fix
@@ -424,9 +491,11 @@ out for common stop words & contractions.
 - Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
 
 ```
+
 Students mention that the stir-fry station (which is made to order) is worth going for, while the salad bar tends to wilt after 1:30.
 
 Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+
 ```
 
 ### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 2
@@ -435,9 +504,11 @@ Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
 - Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
 
 ```
+
 Students say that the salad bar at Kestrel Commons wilts after 1:30, and they recommend the made-to-order stir-fry station as the thing worth going for.
 
 Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+
 ```
 
 ### What do students say about the quality & selection of food at the Kestrel Commons during lunch? — run 3
@@ -446,9 +517,15 @@ Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
 - Sources retrieved: dining_kestrel_commons.txt, dining_kestrel_commons_followup.txt, dining_verrill_street_grill.txt, transit_walking.txt
 
 ```
+
 Students mention that the stir-fry station (which is made to order) is worth going for, while the salad bar tends to wilt after 1:30.
 
 Source: `dining_kestrel_commons.txt` (and `dining_kestrel_commons_followup.txt`)
+
 ```
 
 Generated from run_eval.py using main()
+
+```
+
+```
