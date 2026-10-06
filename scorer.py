@@ -53,10 +53,10 @@ def _stems(words) -> set[str]:
     return {_safe_stem(w) for w in words}
 
 
-def judge(question: str,expects: str, answer: str, results: list[Result], gate_rows: list
-) -> bool:
+def judge(question: str, expects: str, answer: str, results: list[Result], gate_rows: list
+) -> list[bool]:
     """
-    Returns True only if ALL criteria pass:
+    Returns True for each criteria:
       1. Retrieved chunks or Answer contain the expected words         
       2. Every answer names at least one source document 
       3. The relevance gate stops out-of-corpus questions 
